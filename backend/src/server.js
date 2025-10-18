@@ -73,25 +73,24 @@ app.get('/health', (req, res) => {
     });
 });
 
-// CSRF Token endpoint (before CSRF protection middleware)
+// CSRF Token endpoint (public - no CSRF needed)
 app.get('/api/csrf-token', getCsrfToken);
 
-// Auth routes (login/logout/user) - before CSRF protection
+// Auth routes (public - no CSRF for login)
 // Mounted at /api so routes become: /api/login, /api/logout, /api/user
 app.use('/api', authRoutes);
 
-// CSRF Protection middleware (after token endpoint and login)
+// Apply CSRF cookie setter to all subsequent routes
 app.use(setCsrfToken);
-app.use(csrfProtection);
 
-// Protected API Routes
-app.use('/api/notes', notesRoutes);
-app.use('/api/members', membersRoutes);
-app.use('/api/transactions', finopsRoutes);
-app.use('/api/events', eventsRoutes);
-app.use('/api/sponsors', sponsorsRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/followups', followupsRoutes);
+// Protected API Routes (with CSRF protection)
+app.use('/api/notes', csrfProtection, notesRoutes);
+app.use('/api/members', csrfProtection, membersRoutes);
+app.use('/api/transactions', csrfProtection, finopsRoutes);
+app.use('/api/events', csrfProtection, eventsRoutes);
+app.use('/api/sponsors', csrfProtection, sponsorsRoutes);
+app.use('/api/admin', csrfProtection, adminRoutes);
+app.use('/api/followups', csrfProtection, followupsRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -18,13 +18,13 @@ const csrfProtection = (req, res, next) => {
     }
 
     // Skip CSRF in development if disabled
-    if (process.env.NODE_ENV !== 'production' || process.env.CSRF_ENABLED !== 'true') {
+    if (process.env.NODE_ENV !== 'production' && process.env.CSRF_ENABLED !== 'true') {
         return next();
     }
 
-    // Skip CSRF for health check and public endpoints
-    const publicPaths = ['/health', '/api/health'];
-    if (publicPaths.some(path => req.path.startsWith(path))) {
+    // Skip CSRF for health check, public endpoints, and login
+    const publicPaths = ['/health', '/api/health', '/api/csrf-token', '/api/login'];
+    if (publicPaths.some(path => req.path === path || req.path.startsWith(path))) {
         return next();
     }
 
@@ -47,7 +47,7 @@ const csrfProtection = (req, res, next) => {
 // Middleware to set CSRF token cookie
 const setCsrfToken = (req, res, next) => {
     // Skip in development if disabled
-    if (process.env.NODE_ENV !== 'production' || process.env.CSRF_ENABLED !== 'true') {
+    if (process.env.NODE_ENV !== 'production' && process.env.CSRF_ENABLED !== 'true') {
         return next();
     }
 
@@ -60,7 +60,7 @@ const setCsrfToken = (req, res, next) => {
         res.cookie('csrf-token', token, {
             httpOnly: false, // Need to be accessible by JavaScript
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
     }
@@ -76,7 +76,7 @@ const getCsrfToken = (req, res) => {
     res.cookie('csrf-token', token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 24 * 60 * 60 * 1000
     });
 

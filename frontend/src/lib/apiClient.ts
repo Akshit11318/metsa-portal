@@ -61,8 +61,9 @@ export async function apiFetch<T = any>(
         requestHeaders['Authorization'] = `Bearer ${token}`;
     }
 
-    // Add CSRF token for state-changing requests
-    if (options.method && !['GET', 'HEAD', 'OPTIONS'].includes(options.method)) {
+    // Add CSRF token for state-changing requests (except login which doesn't need it)
+    const isLoginRequest = url.includes('/login');
+    if (options.method && !['GET', 'HEAD', 'OPTIONS'].includes(options.method) && !isLoginRequest) {
         const csrfToken = await ensureCsrfToken();
         if (csrfToken) {
             requestHeaders['X-CSRF-Token'] = csrfToken;

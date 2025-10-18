@@ -46,15 +46,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-// CSRF Protection
-app.use(setCsrfToken);
-app.get('/api/csrf-token', getCsrfToken);
-app.use(csrfProtection);
-
 // Serve static files (for uploaded receipts and other files)
 app.use('/uploads', express.static('uploads'));
 
-// Health check endpoint
+// Health check endpoints (before CSRF)
 app.get('/', (req, res) => {
     res.json({
         success: true,
@@ -71,6 +66,13 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
     });
 });
+
+// CSRF Token endpoint (before CSRF protection middleware)
+app.get('/api/csrf-token', getCsrfToken);
+
+// CSRF Protection middleware (after token endpoint)
+app.use(setCsrfToken);
+app.use(csrfProtection);
 
 // API Routes
 app.use('/api', authRoutes);

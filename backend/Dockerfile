@@ -12,7 +12,8 @@ RUN npm ci --only=production
 # Copy application files
 COPY . .
 
-RUN apk add --no-cache openssl libssl3
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
 
 # Generate Prisma Client
 RUN npx prisma generate
@@ -20,8 +21,8 @@ RUN npx prisma generate
 # Production image
 FROM node:20-alpine
 
-# Install wget for healthcheck
-RUN apk add --no-cache wget
+# Install wget for healthcheck and openssl for Prisma
+RUN apk add --no-cache wget openssl
 
 WORKDIR /app
 

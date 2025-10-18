@@ -55,16 +55,15 @@ const setCsrfToken = (req, res, next) => {
     }
 
     // Generate new token if not exists
-    const existingToken = req.cookies && req.cookies['csrf-token'] ? req.cookies['csrf-token'] : null;
+    const existingToken = req.cookies && req.cookies['csrf-token'];
     if (!existingToken) {
         const token = generateToken();
-
-        // Set cookie with secure options
         res.cookie('csrf-token', token, {
-            httpOnly: false, // Need to be accessible by JavaScript
+            httpOnly: false,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax', // Changed to 'lax' for same-origin requests
-            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            sameSite: 'lax',
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000
         });
     }
 
@@ -73,13 +72,14 @@ const setCsrfToken = (req, res, next) => {
 
 // Endpoint to get CSRF token
 const getCsrfToken = (req, res) => {
-    const existingToken = req.cookies && req.cookies['csrf-token'] ? req.cookies['csrf-token'] : null;
+    const existingToken = req.cookies && req.cookies['csrf-token'];
     const token = existingToken || generateToken();
 
     res.cookie('csrf-token', token, {
         httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
+        path: '/',
         maxAge: 24 * 60 * 60 * 1000
     });
 

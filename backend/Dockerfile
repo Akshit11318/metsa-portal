@@ -32,6 +32,10 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Create uploads directory
 RUN mkdir -p uploads/receipts
 
@@ -48,5 +52,4 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD wget --quiet --tries=1 --spider http://localhost:5000/ || exit 1
 
-# Initialize database and start server
-CMD npx prisma migrate deploy && node src/server.js
+ENTRYPOINT ["docker-entrypoint.sh"]

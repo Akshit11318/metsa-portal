@@ -1,0 +1,14 @@
+Username	Password	Role	Core
+admin	admin123	Admin	-
+events_lead	events123	Core	Events
+finops_lead	finops123	Core	FinOps
+sponsor_lead	sponsor123	Core	Sponsorship
+media_lead	media123	Core	Media
+
+
+cd backend
+npx prisma studio
+# Opens at http://localhost:5555
+# Click on "Transaction" model
+# Select rows and delete them
+

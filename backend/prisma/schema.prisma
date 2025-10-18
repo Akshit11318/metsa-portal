@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Users table - Authentication and authorization
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  passwordHash  String
+  role          String   // 'admin', 'core', 'member'
+  core          String?  // 'Events', 'FinOps', 'Sponsorship', 'Media', etc.
+  year          String   // '2025-26'
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  notesCreated  Note[]
+  transactions  Transaction[]
+  
+  @@map("users")
+}
+
+// Notes table - Universal notes system
+model Note {
+  id           Int       @id @default(autoincrement())
+  content      String
+  createdBy    Int
+  role         String    // Role of creator
+  visibility   String    @default("all") // 'all', 'core', 'admin'
+  relatedType  String?   // 'member', 'event', 'sponsor', 'transaction'
+  relatedId    Int?      // Generic ID - points to different entities based on relatedType
+  status       String    @default("pending") // 'pending', 'complete', 'archived'
+  followUpDate DateTime? // Optional follow-up reminder
+  year         String    // '2025-26'
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  creator      User      @relation(fields: [createdBy], references: [id])
+  
+  @@map("notes")
+}
+
+// Members table
+model Member {
+  id         Int      @id @default(autoincrement())
+  name       String
+  rollNo     String?  @unique // Roll number
+  email      String?  @unique
+  phone      String?
+  program    String   // 'B.Tech', 'M.Tech', etc.
+  branch     String?  // 'CSE', 'ECE', etc.
+  core       String?  // 'Events', 'FinOps', etc.
+  joinYear   String   // '2024-25'
+  gradYear   String   // '2028'
+  year       String   // Current operational year '2025-26'
+  status     String   @default("active") // 'active', 'inactive', 'alumni'
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@map("members")
+}
+
+// Transactions table - FinOps
+model Transaction {
+  id          Int       @id @default(autoincrement())
+  type        String    // 'inflow', 'outflow'
+  amount      Float
+  purpose     String
+  category    String?   // 'sponsorship', 'event', 'operational', etc.
+  approver    Int?
+  status      String    @default("pending") // 'pending', 'approved', 'rejected'
+  notesId     Int?      // Link to notes
+  receiptUrl  String?   // Optional receipt/bill URL
+  date        DateTime
+  year        String    // '2025-26'
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  approvedBy  User?     @relation(fields: [approver], references: [id])
+  
+  @@map("transactions")
+}
+
+// Events table
+model Event {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  core        String    // Organizing core
+  date        DateTime
+  venue       String?
+  status      String    @default("planned") // 'planned', 'ongoing', 'completed', 'cancelled'
+  budget      Float?
+  notesId     Int?      // Link to notes
+  year        String    // '2025-26'
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("events")
+}
+
+// Sponsors table
+model Sponsor {
+  id             Int       @id @default(autoincrement())
+  name           String
+  contactPerson  String?
+  email          String?
+  phone          String?
+  stage          String    @default("prospective") // 'prospective', 'contacted', 'negotiating', 'confirmed', 'rejected'
+  amount         Float?
+  followUpDate   DateTime?
+  notesId        Int?      // Link to notes
+  year           String    // '2025-26'
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  @@map("sponsors")
+}
+
+// Admin Updates table - Global announcements
+model AdminUpdate {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  priority  String   @default("normal") // 'low', 'normal', 'high', 'urgent'
+  year      String   // '2025-26'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("admin_updates")
+}

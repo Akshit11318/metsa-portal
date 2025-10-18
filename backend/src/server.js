@@ -46,6 +46,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
+// Debug middleware - log all requests
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} ${req.originalUrl}`);
+    next();
+});
+
 // Serve static files (for uploaded receipts and other files)
 app.use('/uploads', express.static('uploads'));
 
@@ -70,7 +76,8 @@ app.get('/health', (req, res) => {
 // CSRF Token endpoint (before CSRF protection middleware)
 app.get('/api/csrf-token', getCsrfToken);
 
-// Login route (before CSRF protection - login doesn't need CSRF)
+// Auth routes (login/logout/user) - before CSRF protection
+// Mounted at /api so routes become: /api/login, /api/logout, /api/user
 app.use('/api', authRoutes);
 
 // CSRF Protection middleware (after token endpoint and login)

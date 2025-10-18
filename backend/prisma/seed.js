@@ -9,25 +9,61 @@ function generateStrongPassword(length = 16) {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
     let password = '';
     const randomBytes = crypto.randomBytes(length);
-    
+
     for (let i = 0; i < length; i++) {
         password += charset[randomBytes[i] % charset.length];
     }
-    
+
     return password;
 }
 
 async function main() {
     console.log('🌱 Starting database seeding...');
 
-    // Clear existing data
-    await prisma.adminUpdate.deleteMany();
-    await prisma.sponsor.deleteMany();
-    await prisma.event.deleteMany();
-    await prisma.transaction.deleteMany();
-    await prisma.note.deleteMany();
-    await prisma.member.deleteMany();
-    await prisma.user.deleteMany();
+    // Clear existing data - wrapped in try-catch to handle missing tables
+    console.log('🗑️  Clearing existing data...');
+
+    try {
+        await prisma.adminUpdate.deleteMany();
+    } catch (e) {
+        console.log('⚠️  AdminUpdate table not found, skipping...');
+    }
+
+    try {
+        await prisma.sponsor.deleteMany();
+    } catch (e) {
+        console.log('⚠️  Sponsor table not found, skipping...');
+    }
+
+    try {
+        await prisma.event.deleteMany();
+    } catch (e) {
+        console.log('⚠️  Event table not found, skipping...');
+    }
+
+    try {
+        await prisma.transaction.deleteMany();
+    } catch (e) {
+        console.log('⚠️  Transaction table not found, skipping...');
+    }
+
+    try {
+        await prisma.note.deleteMany();
+    } catch (e) {
+        console.log('⚠️  Note table not found, skipping...');
+    }
+
+    try {
+        await prisma.member.deleteMany();
+    } catch (e) {
+        console.log('⚠️  Member table not found, skipping...');
+    }
+
+    try {
+        await prisma.user.deleteMany();
+    } catch (e) {
+        console.log('⚠️  User table not found, skipping...');
+    }
 
     console.log('✨ Cleared existing data');
 
@@ -335,7 +371,7 @@ async function main() {
     console.log(`│ media_lead      │ ${passwords.media_lead.padEnd(18)} │ Core - Media     │`);
     console.log('└─────────────────┴────────────────────┴──────────────────┘');
     console.log('\n⚠️  IMPORTANT: Save these passwords securely and change them after first login!');
-    
+
     // Return passwords so setup script can save them
     return passwords;
 }

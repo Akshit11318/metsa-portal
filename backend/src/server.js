@@ -76,12 +76,12 @@ app.get('/health', (req, res) => {
 // CSRF Token endpoint (public - no CSRF needed)
 app.get('/api/csrf-token', getCsrfToken);
 
+// Apply CSRF cookie setter to ALL routes (including auth)
+app.use(setCsrfToken);
+
 // Auth routes (public - no CSRF for login)
 // Mounted at /api so routes become: /api/login, /api/logout, /api/user
 app.use('/api', authRoutes);
-
-// Apply CSRF cookie setter to all subsequent routes
-app.use(setCsrfToken);
 
 // Protected API Routes (with CSRF protection)
 app.use('/api/notes', csrfProtection, notesRoutes);

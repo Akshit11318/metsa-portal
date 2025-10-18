@@ -5,7 +5,7 @@ node_modules/
 .env
 .env.local
 .env.production
-
+package-lock.json
 # Database
 *.db
 *.db-journal

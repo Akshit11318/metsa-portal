@@ -52,7 +52,8 @@ const setCsrfToken = (req, res, next) => {
     }
 
     // Generate new token if not exists
-    if (!req.cookies ? .['csrf-token']) {
+    const existingToken = req.cookies && req.cookies['csrf-token'] ? req.cookies['csrf-token'] : null;
+    if (!existingToken) {
         const token = generateToken();
 
         // Set cookie with secure options
@@ -69,7 +70,8 @@ const setCsrfToken = (req, res, next) => {
 
 // Endpoint to get CSRF token
 const getCsrfToken = (req, res) => {
-    const token = req.cookies ? .['csrf-token'] || generateToken();
+    const existingToken = req.cookies && req.cookies['csrf-token'] ? req.cookies['csrf-token'] : null;
+    const token = existingToken || generateToken();
 
     res.cookie('csrf-token', token, {
         httpOnly: false,

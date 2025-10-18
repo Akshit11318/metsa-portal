@@ -36,13 +36,17 @@ COPY --from=builder /app/src ./src
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Create uploads directory
-RUN mkdir -p uploads/receipts
+# Create uploads and data directories with proper permissions
+RUN mkdir -p uploads/receipts && \
+    chmod 777 /app && \
+    chmod 755 uploads
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
+    adduser -S nodejs -u 1001
+
+# Grant write permissions to nodejs user for app directory
+RUN chown -R nodejs:nodejs /app && chmod -R 755 /app
 
 USER nodejs
 

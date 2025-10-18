@@ -70,12 +70,14 @@ app.get('/health', (req, res) => {
 // CSRF Token endpoint (before CSRF protection middleware)
 app.get('/api/csrf-token', getCsrfToken);
 
-// CSRF Protection middleware (after token endpoint)
+// Login route (before CSRF protection - login doesn't need CSRF)
+app.use('/api', authRoutes);
+
+// CSRF Protection middleware (after token endpoint and login)
 app.use(setCsrfToken);
 app.use(csrfProtection);
 
-// API Routes
-app.use('/api', authRoutes);
+// Protected API Routes
 app.use('/api/notes', notesRoutes);
 app.use('/api/members', membersRoutes);
 app.use('/api/transactions', finopsRoutes);

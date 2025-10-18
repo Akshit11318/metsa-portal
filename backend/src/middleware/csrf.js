@@ -23,8 +23,11 @@ const csrfProtection = (req, res, next) => {
     }
 
     // Skip CSRF for health check, public endpoints, and login
-    const publicPaths = ['/health', '/api/health', '/api/csrf-token', '/api/login'];
-    if (publicPaths.some(path => req.path === path || req.path.startsWith(path))) {
+    // Use both req.path and req.originalUrl to catch all cases
+    const publicPaths = ['/health', '/api/health', '/api/csrf-token', '/api/login', '/login'];
+    const requestPath = req.originalUrl || req.path;
+
+    if (publicPaths.some(path => requestPath === path || requestPath.startsWith(path))) {
         return next();
     }
 

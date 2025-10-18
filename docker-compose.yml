@@ -49,17 +49,16 @@ services:
     container_name: metsa-nginx
     restart: unless-stopped
     ports:
-      - "4556:80"
+      - "4556:4556"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/security-headers.conf:/etc/nginx/security-headers.conf:ro
     networks:
       - metsa-network
     depends_on:
       - backend
       - frontend
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4556/health"]
       interval: 30s
       timeout: 10s
       retries: 3

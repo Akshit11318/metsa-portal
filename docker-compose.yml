@@ -16,7 +16,7 @@ services:
       - DEFAULT_YEAR=2025
     volumes:
       - backend-db:/app/prisma
-      - ./backend/uploads:/app/uploads
+      - backend-uploads:/app/uploads
       - backend-data:/app/data
     networks:
       - metsa-network
@@ -71,6 +71,8 @@ networks:
 
 volumes:
   backend-db:
+    driver: local
+  backend-uploads:
     driver: local
   backend-data:
     driver: local

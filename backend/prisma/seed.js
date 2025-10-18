@@ -20,6 +20,14 @@ function generateStrongPassword(length = 16) {
 async function main() {
     console.log('🌱 Starting database seeding...');
 
+    // Check if users already exist
+    const existingUserCount = await prisma.user.count().catch(() => 0);
+    if (existingUserCount > 0) {
+        console.log(`⚠️  Database already has ${existingUserCount} users. Skipping seed to preserve existing data.`);
+        console.log('💡 If you want to re-seed, manually delete the database and restart the container.');
+        return;
+    }
+
     // Clear existing data - wrapped in try-catch to handle missing tables
     console.log('🗑️  Clearing existing data...');
 

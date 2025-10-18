@@ -15,11 +15,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Function to generate secure 12-character alphanumeric password
-generate_password() {
-    cat /dev/urandom | tr -dc 'A-Za-z0-9' | fold -w 12 | head -n 1
-}
-
 # Function to print colored output
 print_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -77,27 +72,127 @@ main() {
     npx prisma migrate reset --force --skip-seed
     print_success "Database reset complete"
     
-    # Generate secure passwords for default accounts
-    print_header "Creating Default Admin Accounts"
+    # Run seed script and capture output with passwords
+    print_header "Creating Default Admin Accounts with Strong Passwords"
+    print_info "Seeding database with default accounts..."
     
-    ADMIN_PASSWORD=$(generate_password)
-    CORE_PASSWORD=$(generate_password)
-    MEMBER_PASSWORD=$(generate_password)
+    # Run seed and capture the credentials table
+    SEED_OUTPUT=$(npx prisma db seed 2>&1)
+    echo "$SEED_OUTPUT"
+    
+    # Extract passwords from seed output and save to credentials file
+    print_info "Saving credentials to credentials.txt..."
+    
+    echo "$SEED_OUTPUT" | awk '/Generated Login Credentials/,/IMPORTANT/' > ../credentials.txt
+    
+    if [ -f "../credentials.txt" ]; then
+        print_success "Credentials saved to credentials.txt"
+        print_warning "⚠️  IMPORTANT: Copy credentials.txt to a secure location and DELETE it!"
+    fi
     
     # Create .env file with secure JWT secret if it doesn't exist
     if [ ! -f ".env" ]; then
         print_info "Creating .env file..."
         JWT_SECRET=$(cat /dev/urandom | tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' | fold -w 64 | head -n 1)
         cat > .env << EOF
-# Server Configuration
+# ============================================
+# SERVER CONFIGURATION
+# ============================================
 NODE_ENV=production
 PORT=5000
 
-# Database
+# ============================================
+# DATABASE
+# ============================================
 DATABASE_URL="file:./dev.db"
 
-# JWT Secret (randomly generated)
+# ============================================
+# JWT SECRET (randomly generated)
+# ============================================
 JWT_SECRET=${JWT_SECRET}
+
+# ============================================
+# DEFAULT YEAR
+# ============================================
+DEFAULT_YEAR=2025
+
+# ============================================
+# CORS - Update this for your domain!
+# ============================================
+CORS_ORIGIN=https://metsa.kryptolo121.xyz
+
+# ============================================
+# CSRF PROTECTION
+# ============================================
+CSRF_ENABLED=true
+CSRF_SECRET=$(cat /dev/urandom | tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' | fold -w 32 | head -n 1)
+EOF
+        print_success ".env file created with secure secrets"
+    else
+        print_warning ".env file already exists. Skipping .env creation."
+        print_info "Please verify CORS_ORIGIN and other settings in backend/.env"
+    fi
+    
+    # Return to root directory
+    cd ..
+    
+    # Setup frontend
+    print_header "Setting Up Frontend"
+    cd frontend
+    
+    print_info "Installing frontend dependencies..."
+    npm install
+    print_success "Frontend dependencies installed"
+    
+    # Create production .env file for frontend
+    if [ ! -f ".env.production" ]; then
+        print_info "Creating frontend environment configuration..."
+        cat > .env.production << EOF
+# API Configuration - Update this for your domain!
+VITE_API_URL=https://metsa.kryptolo121.xyz/api
+
+# App Information
+VITE_APP_NAME=MetSA Portal
+VITE_APP_DOMAIN=metsa.kryptolo121.xyz
+EOF
+        print_success "Frontend configuration created"
+    else
+        print_warning ".env.production already exists. Skipping frontend env creation."
+    fi
+    
+    cd ..
+    
+    # Final summary
+    print_header "Setup Complete!"
+    
+    echo ""
+    print_success "✅ Backend dependencies installed"
+    print_success "✅ Database initialized and seeded"
+    print_success "✅ Default admin accounts created"
+    print_success "✅ Frontend dependencies installed"
+    print_success "✅ Environment variables configured"
+    echo ""
+    print_info "Created accounts:"
+    echo -e "  ${GREEN}•${NC} admin (Admin)"
+    echo -e "  ${GREEN}•${NC} events_lead (Core - Events)"
+    echo -e "  ${GREEN}•${NC} finops_lead (Core - FinOps)"
+    echo -e "  ${GREEN}•${NC} sponsor_lead (Core - Sponsorship)"
+    echo -e "  ${GREEN}•${NC} media_lead (Core - Media)"
+    echo ""
+    print_warning "⚠️  IMPORTANT NEXT STEPS:"
+    echo "   1. Open credentials.txt and save the passwords securely"
+    echo "   2. DELETE credentials.txt after copying passwords"
+    echo "   3. Review backend/.env and update CORS_ORIGIN if needed"
+    echo "   4. Review frontend/.env.production and update VITE_API_URL if needed"
+    echo "   5. Run './run.sh start' to launch the application"
+    echo "   6. Change all default passwords after first login"
+    echo ""
+    print_info "Application will be available at: ${GREEN}https://metsa.kryptolo121.xyz${NC}"
+    echo ""
+}
+
+# Run main function
+main
 
 # Default Year
 DEFAULT_YEAR=2025

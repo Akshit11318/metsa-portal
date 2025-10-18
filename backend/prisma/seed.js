@@ -1,7 +1,21 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 const prisma = new PrismaClient();
+
+// Function to generate strong random password
+function generateStrongPassword(length = 16) {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    const randomBytes = crypto.randomBytes(length);
+    
+    for (let i = 0; i < length; i++) {
+        password += charset[randomBytes[i] % charset.length];
+    }
+    
+    return password;
+}
 
 async function main() {
     console.log('🌱 Starting database seeding...');
@@ -17,14 +31,20 @@ async function main() {
 
     console.log('✨ Cleared existing data');
 
-    // Create users
-    const adminPassword = await bcrypt.hash('admin123', 10);
-    const corePassword = await bcrypt.hash('core123', 10);
+    // Generate strong random passwords
+    const passwords = {
+        admin: generateStrongPassword(),
+        events_lead: generateStrongPassword(),
+        finops_lead: generateStrongPassword(),
+        sponsor_lead: generateStrongPassword(),
+        media_lead: generateStrongPassword(),
+    };
 
+    // Create users with strong passwords
     const admin = await prisma.user.create({
         data: {
             username: 'admin',
-            passwordHash: adminPassword,
+            passwordHash: await bcrypt.hash(passwords.admin, 10),
             role: 'admin',
             year: '2025',
         },
@@ -33,7 +53,7 @@ async function main() {
     const eventsLead = await prisma.user.create({
         data: {
             username: 'events_lead',
-            passwordHash: await bcrypt.hash('events123', 10),
+            passwordHash: await bcrypt.hash(passwords.events_lead, 10),
             role: 'core',
             core: 'Events',
             year: '2025',
@@ -43,7 +63,7 @@ async function main() {
     const finopsLead = await prisma.user.create({
         data: {
             username: 'finops_lead',
-            passwordHash: await bcrypt.hash('finops123', 10),
+            passwordHash: await bcrypt.hash(passwords.finops_lead, 10),
             role: 'core',
             core: 'FinOps',
             year: '2025',
@@ -53,7 +73,7 @@ async function main() {
     const sponsorLead = await prisma.user.create({
         data: {
             username: 'sponsor_lead',
-            passwordHash: await bcrypt.hash('sponsor123', 10),
+            passwordHash: await bcrypt.hash(passwords.sponsor_lead, 10),
             role: 'core',
             core: 'Sponsorship',
             year: '2025',
@@ -63,7 +83,7 @@ async function main() {
     const mediaLead = await prisma.user.create({
         data: {
             username: 'media_lead',
-            passwordHash: await bcrypt.hash('media123', 10),
+            passwordHash: await bcrypt.hash(passwords.media_lead, 10),
             role: 'core',
             core: 'Media',
             year: '2025',
@@ -77,6 +97,9 @@ async function main() {
         sponsorLead: sponsorLead.username,
         mediaLead: mediaLead.username,
     });
+
+    // Store passwords for credentials file (will be handled by setup script)
+    global.generatedPasswords = passwords;
 
     // Create sample members
     const members = await Promise.all([
@@ -301,16 +324,20 @@ async function main() {
     console.log('📢 Created admin updates:', updates.length);
 
     console.log('\n✅ Database seeding completed successfully!');
-    console.log('\n📌 Default Login Credentials:');
-    console.log('┌─────────────────┬──────────────┬──────────────┐');
-    console.log('│ Username        │ Password     │ Role         │');
-    console.log('├─────────────────┼──────────────┼──────────────┤');
-    console.log('│ admin           │ admin123     │ Admin        │');
-    console.log('│ events_lead     │ events123    │ Core - Events│');
-    console.log('│ finops_lead     │ finops123    │ Core - FinOps│');
-    console.log('│ sponsor_lead    │ sponsor123   │ Core - Sponsor│');
-    console.log('│ media_lead      │ media123     │ Core - Media │');
-    console.log('└─────────────────┴──────────────┴──────────────┘');
+    console.log('\n📌 Generated Login Credentials (SAVE THESE SECURELY!):');
+    console.log('┌─────────────────┬────────────────────┬──────────────────┐');
+    console.log('│ Username        │ Password           │ Role             │');
+    console.log('├─────────────────┼────────────────────┼──────────────────┤');
+    console.log(`│ admin           │ ${passwords.admin.padEnd(18)} │ Admin            │`);
+    console.log(`│ events_lead     │ ${passwords.events_lead.padEnd(18)} │ Core - Events    │`);
+    console.log(`│ finops_lead     │ ${passwords.finops_lead.padEnd(18)} │ Core - FinOps    │`);
+    console.log(`│ sponsor_lead    │ ${passwords.sponsor_lead.padEnd(18)} │ Core - Sponsor   │`);
+    console.log(`│ media_lead      │ ${passwords.media_lead.padEnd(18)} │ Core - Media     │`);
+    console.log('└─────────────────┴────────────────────┴──────────────────┘');
+    console.log('\n⚠️  IMPORTANT: Save these passwords securely and change them after first login!');
+    
+    // Return passwords so setup script can save them
+    return passwords;
 }
 
 main()

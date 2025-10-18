@@ -30,7 +30,7 @@ const csrfProtection = (req, res, next) => {
 
     // Get CSRF token from header
     const token = req.headers['x-csrf-token'];
-    const cookieToken = req.cookies ? .['csrf-token'];
+    const cookieToken = req.cookies && req.cookies['csrf-token'] ? req.cookies['csrf-token'] : null;
 
     // Validate token
     if (!token || !cookieToken || token !== cookieToken) {

@@ -53,3 +53,9 @@ export const getBackendFileUrl = (path: string) => {
     const cleanPath = path.startsWith('/') ? path.substring(1) : path;
     return `${API_CONFIG.BACKEND_URL}/${cleanPath}`;
 };
+
+// Helper function to get CSRF token from cookie
+export const getCsrfToken = (): string | null => {
+    const match = document.cookie.match(/csrf-token=([^;]+)/);
+    return match ? match[1] : null;
+};

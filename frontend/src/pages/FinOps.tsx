@@ -14,7 +14,7 @@ import {
   Plus, FileDown, TrendingUp, TrendingDown, IndianRupee,
   Calendar, Bell, CheckCircle, XCircle, Eye, Upload
 } from 'lucide-react';
-import { getApiUrl, API_ENDPOINTS, getBackendFileUrl } from '@/lib/api';
+import { getApiUrl, API_ENDPOINTS, getBackendFileUrl, getCsrfToken } from '@/lib/api';
 import { apiGet, apiPost, apiPatch } from '@/lib/apiClient';
 import { useAuthStore } from '@/store/authStore';
 
@@ -120,12 +120,15 @@ export default function FinOps() {
       if (formData.receiptFile) {
         const uploadFormData = new FormData();
         uploadFormData.append('receipt', formData.receiptFile);
+        const csrfToken = getCsrfToken();
 
         const uploadResponse = await fetch(`${getApiUrl(API_ENDPOINTS.FINOPS)}/upload-receipt`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${useAuthStore.getState().token}`,
+            ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
           },
+          credentials: 'include',
           body: uploadFormData,
         });
 

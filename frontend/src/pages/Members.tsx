@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Search, UserPlus, FileDown, FileUp, Edit2, Trash2, Upload } from 'lucide-react';
-import { getApiUrl, API_ENDPOINTS } from '@/lib/api';
+import { getApiUrl, API_ENDPOINTS, getCsrfToken } from '@/lib/api';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/apiClient';
 import { useAuthStore } from '@/store/authStore';
 
@@ -205,12 +205,15 @@ export default function Members() {
       const formData = new FormData();
       formData.append('file', file);
       const { token } = useAuthStore.getState();
+      const csrfToken = getCsrfToken();
 
       const response = await fetch(`${getApiUrl(API_ENDPOINTS.MEMBERS)}/upload-csv`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          ...(csrfToken && { 'X-CSRF-Token': csrfToken }),
         },
+        credentials: 'include',
         body: formData,
       });
 

@@ -15,7 +15,7 @@ services:
       - JWT_SECRET=metsa-portal-2025-secret-key-change-in-production
       - DEFAULT_YEAR=2025
     volumes:
-      - ./backend/prisma:/app/prisma
+      - backend-db:/app/prisma
       - ./backend/uploads:/app/uploads
       - backend-data:/app/data
     networks:
@@ -70,5 +70,7 @@ networks:
     driver: bridge
 
 volumes:
+  backend-db:
+    driver: local
   backend-data:
     driver: local

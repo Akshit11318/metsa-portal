@@ -12,6 +12,8 @@ services:
       - DATABASE_URL=file:./dev.db
       - CORS_ORIGIN=https://metsa.kryptolo121.xyz
       - CSRF_ENABLED=true
+      - JWT_SECRET=metsa-portal-2025-secret-key-change-in-production
+      - DEFAULT_YEAR=2025
     volumes:
       - ./backend/prisma:/app/prisma
       - ./backend/uploads:/app/uploads

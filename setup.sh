@@ -72,6 +72,11 @@ main() {
     npx prisma migrate reset --force --skip-seed
     print_success "Database reset complete"
     
+    # Push database schema (ensures all tables are created)
+    print_info "Applying database schema..."
+    npx prisma db push --skip-generate --accept-data-loss
+    print_success "Database schema applied"
+    
     # Run seed script and capture output with passwords
     print_header "Creating Default Admin Accounts with Strong Passwords"
     print_info "Seeding database with default accounts..."

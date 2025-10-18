@@ -23,6 +23,9 @@
     ],
     "author": "MetSA Team",
     "license": "MIT",
+    "prisma": {
+        "seed": "node prisma/seed.js"
+    },
     "dependencies": {
         "@prisma/client": "^5.19.0",
         "bcrypt": "^5.1.1",

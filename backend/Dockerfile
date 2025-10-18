@@ -12,6 +12,8 @@ RUN npm ci --only=production
 # Copy application files
 COPY . .
 
+RUN apk add --no-cache openssl libssl3
+
 # Generate Prisma Client
 RUN npx prisma generate
 

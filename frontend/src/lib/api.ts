@@ -1,7 +1,7 @@
 // API Configuration
 export const API_CONFIG = {
-    BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-    BACKEND_URL: import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000',
+    BASE_URL: import.meta.env.VITE_API_URL || '/api',
+    BACKEND_URL: import.meta.env.VITE_API_URL?.replace('/api', '') || '',
     TIMEOUT: 30000,
     DEFAULT_YEAR: '2025',
 };
